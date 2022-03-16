@@ -6,8 +6,7 @@
     "dependencies": [],
     "codeowners": ["@mark1foley"],
     "requirements": [
-        "gtfs-realtime-bindings==0.0.5",
-        "protobuf==3.6.1"
+        "gtfs-realtime-bindings==0.0.5"
     ],
     "version": "1.20220316.01"
 }
