@@ -9,5 +9,5 @@
         "gtfs-realtime-bindings==0.0.5",
         "protobuf==3.6.1"
     ],
-    "version": "1.20210420.03"
+    "version": "1.20220316.01"
 }
