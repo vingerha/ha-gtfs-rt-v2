@@ -34,9 +34,6 @@ CONF_SERVICE_TYPE = 'service_type'
 DEFAULT_SERVICE = 'Service'
 DEFAULT_ICON = 'mdi:bus'
 
-MIN_TIME_BETWEEN_UPDATES = datetime.timedelta(seconds=CONF_UPDATE_FREQUENCY)
-TIME_STR_FORMAT = "%H:%M"
-
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_TRIP_UPDATE_URL): cv.string,
     vol.Optional(CONF_UPDATE_FREQUENCY, default=60): cv.positive_int,
@@ -73,6 +70,9 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
             departure.get(CONF_SERVICE_TYPE),
             departure.get(CONF_NAME)
         ))
+
+    MIN_TIME_BETWEEN_UPDATES = datetime.timedelta(seconds=config.get(CONF_UPDATE_FREQUENCY))
+    TIME_STR_FORMAT = "%H:%M"
 
     add_devices(sensors)
 
