@@ -25,7 +25,6 @@ CONF_STOP_ID = 'stopid'
 CONF_ROUTE = 'route'
 CONF_DEPARTURES = 'departures'
 CONF_TRIP_UPDATE_URL = 'trip_update_url'
-CONF_UPDATE_FREQUENCY = 'update_frequency'
 CONF_VEHICLE_POSITION_URL = 'vehicle_position_url'
 CONF_ROUTE_DELIMITER = 'route_delimiter'
 CONF_ICON = 'icon'
@@ -34,9 +33,11 @@ CONF_SERVICE_TYPE = 'service_type'
 DEFAULT_SERVICE = 'Service'
 DEFAULT_ICON = 'mdi:bus'
 
+MIN_TIME_BETWEEN_UPDATES = datetime.timedelta(seconds=60)
+TIME_STR_FORMAT = "%H:%M"
+
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_TRIP_UPDATE_URL): cv.string,
-    vol.Optional(CONF_UPDATE_FREQUENCY, default=60): cv.positive_int,
     vol.Optional(CONF_API_KEY): cv.string,
     vol.Optional(CONF_VEHICLE_POSITION_URL): cv.string,
     vol.Optional(CONF_ROUTE_DELIMITER): cv.string,
@@ -59,7 +60,7 @@ def due_in_minutes(timestamp):
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Get the public transport sensor."""
     
-    data = PublicTransportData(config.get(CONF_TRIP_UPDATE_URL), config.get(CONF_UPDATE_FREQUENCY), config.get(CONF_VEHICLE_POSITION_URL), config.get(CONF_ROUTE_DELIMITER), config.get(CONF_API_KEY))
+    data = PublicTransportData(config.get(CONF_TRIP_UPDATE_URL), config.get(CONF_VEHICLE_POSITION_URL), config.get(CONF_ROUTE_DELIMITER), config.get(CONF_API_KEY))
     sensors = []
     for departure in config.get(CONF_DEPARTURES):
         sensors.append(PublicTransportSensor(
@@ -71,11 +72,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
             departure.get(CONF_NAME)
         ))
 
-    MIN_TIME_BETWEEN_UPDATES = datetime.timedelta(seconds=config.get(CONF_UPDATE_FREQUENCY))
-    TIME_STR_FORMAT = "%H:%M"
-
     add_devices(sensors)
-
 
 class PublicTransportSensor(Entity):
     """Implementation of a public transport sensor."""
@@ -167,10 +164,9 @@ class PublicTransportSensor(Entity):
 class PublicTransportData(object):
     """The Class for handling the data retrieval."""
 
-    def __init__(self, trip_update_url, update_frequency, vehicle_position_url=None, route_delimiter=None, api_key=None):
+    def __init__(self, trip_update_url, vehicle_position_url=None, route_delimiter=None, api_key=None):
         """Initialize the info object."""
         self._trip_update_url = trip_update_url
-        self._update_frequency = update_frequency
         self._vehicle_position_url = vehicle_position_url
         self._route_delimiter = route_delimiter
         if api_key is not None:
@@ -182,7 +178,6 @@ class PublicTransportData(object):
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
         _LOGGER.info("trip_update_url: {}".format(self._trip_update_url))
-        _LOGGER.info("update_frequency: {}".format(self._update_frequency))
         _LOGGER.info("vehicle_position_url: {}".format(self._vehicle_position_url))
         _LOGGER.info("route_delimiter: {0}".format(self._route_delimiter))
         _LOGGER.info("header: {0}".format(self._headers))
