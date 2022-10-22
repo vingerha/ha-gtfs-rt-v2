@@ -53,6 +53,7 @@ Configuration variables:
 - **update_frequency** (*Optional*): Frequency (in seconds) that updates occur.  Default is 60
 - **vehicle_position_url** (*Optional*): Provides live position tracking on the home assistant map
 - **api_key** (*Optional*): If provided, this key will be sent with API requests in an "Authorization" header.
+- **x_api_key** (*Optional*): If provided, this key will be sent with API requests in an "Authorization" header.
 - **route_delimiter** (*Optional*): If provided, the text in the feed's route id before the delimiter is used as the route id.  Useful if the provider incorporates calendar ids into their route ids.
 - **departures** (*Required*): A list of routes and departure locations to watch
 - **name** (*Required*): The name of the sensor in HA.  When displaying on the map card HA generates the name using the first letters of the first 3 words.  So, 1<space>0<space>7<space>Bus shows as "107" on the map.  Different labels can be defined when displaying the sensor on an entiry card etc.

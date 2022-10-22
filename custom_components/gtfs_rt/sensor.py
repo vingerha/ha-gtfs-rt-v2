@@ -21,6 +21,7 @@ ATTR_NEXT_UP = "Next Service"
 ATTR_ICON = "Icon"
 
 CONF_API_KEY = 'api_key'
+CONF_X_API_KEY = 'x_api_key'
 CONF_STOP_ID = 'stopid'
 CONF_ROUTE = 'route'
 CONF_DEPARTURES = 'departures'
@@ -39,6 +40,7 @@ TIME_STR_FORMAT = "%H:%M"
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_TRIP_UPDATE_URL): cv.string,
     vol.Optional(CONF_API_KEY): cv.string,
+    vol.Optional(CONF_X_API_KEY): cv.string,
     vol.Optional(CONF_VEHICLE_POSITION_URL): cv.string,
     vol.Optional(CONF_ROUTE_DELIMITER): cv.string,
     vol.Optional(CONF_DEPARTURES): [{
@@ -60,7 +62,7 @@ def due_in_minutes(timestamp):
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Get the public transport sensor."""
     
-    data = PublicTransportData(config.get(CONF_TRIP_UPDATE_URL), config.get(CONF_VEHICLE_POSITION_URL), config.get(CONF_ROUTE_DELIMITER), config.get(CONF_API_KEY))
+    data = PublicTransportData(config.get(CONF_TRIP_UPDATE_URL), config.get(CONF_VEHICLE_POSITION_URL), config.get(CONF_ROUTE_DELIMITER), config.get(CONF_API_KEY, config.get(CONF_X_API_KEY)))
     sensors = []
     for departure in config.get(CONF_DEPARTURES):
         sensors.append(PublicTransportSensor(
@@ -164,13 +166,15 @@ class PublicTransportSensor(Entity):
 class PublicTransportData(object):
     """The Class for handling the data retrieval."""
 
-    def __init__(self, trip_update_url, vehicle_position_url=None, route_delimiter=None, api_key=None):
+    def __init__(self, trip_update_url, vehicle_position_url=None, route_delimiter=None, api_key=None, x_api_key=None):
         """Initialize the info object."""
         self._trip_update_url = trip_update_url
         self._vehicle_position_url = vehicle_position_url
         self._route_delimiter = route_delimiter
         if api_key is not None:
             self._headers = {'Authorization': api_key}
+        elif x_api_key is not None:
+            self._headers = {'x-api-key': x_api_key}
         else:
             self._headers = None
         self.info = {}
