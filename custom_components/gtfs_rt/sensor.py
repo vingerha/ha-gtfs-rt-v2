@@ -62,7 +62,7 @@ def due_in_minutes(timestamp):
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Get the public transport sensor."""
     
-    data = PublicTransportData(config.get(CONF_TRIP_UPDATE_URL), config.get(CONF_VEHICLE_POSITION_URL), config.get(CONF_ROUTE_DELIMITER), config.get(CONF_API_KEY, config.get(CONF_X_API_KEY)))
+    data = PublicTransportData(config.get(CONF_TRIP_UPDATE_URL), config.get(CONF_VEHICLE_POSITION_URL), config.get(CONF_ROUTE_DELIMITER), config.get(CONF_API_KEY), config.get(CONF_X_API_KEY))
     sensors = []
     for departure in config.get(CONF_DEPARTURES):
         sensors.append(PublicTransportSensor(
