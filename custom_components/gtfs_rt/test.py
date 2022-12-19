@@ -1,16 +1,20 @@
-import datetime
+"""
+Script for quicker and easier testing of GTFS-RT-V2 outside of Home Assistant.
+Usage: test.py -f <yaml file> -d INFO|DEBUG { -o <outfile file> }
+
+<yaml file> contains the sensor configuration from HA.  See test_translink.yaml for example
+<output file> is a text file for output
+"""
+from urllib.request import urlopen, Request
+from datetime import datetime, timedelta
+from schema import Schema, SchemaError, Optional
+import sys
 import logging
+import yaml
 import requests
+import argparse
 
-import voluptuous as vol
-
-from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import (CONF_NAME, ATTR_LONGITUDE, ATTR_LATITUDE)
-import homeassistant.util.dt as dt_util
-from homeassistant.helpers.entity import Entity
-from homeassistant.util import Throttle
-import homeassistant.helpers.config_validation as cv
-
+sys.path.append("lib")
 _LOGGER = logging.getLogger(__name__)
 
 ATTR_STOP_ID = "Stop ID"
@@ -19,6 +23,8 @@ ATTR_DUE_IN = "Due in"
 ATTR_DUE_AT = "Due at"
 ATTR_NEXT_UP = "Next Service"
 ATTR_ICON = "Icon"
+ATTR_LATITUDE = "Latitude"
+ATTR_LONGITUDE = "Longitude"
 
 CONF_API_KEY = 'api_key'
 CONF_X_API_KEY = 'x_api_key'
@@ -30,53 +36,36 @@ CONF_VEHICLE_POSITION_URL = 'vehicle_position_url'
 CONF_ROUTE_DELIMITER = 'route_delimiter'
 CONF_ICON = 'icon'
 CONF_SERVICE_TYPE = 'service_type'
+CONF_NAME = 'name'
 
 DEFAULT_SERVICE = 'Service'
 DEFAULT_ICON = 'mdi:bus'
 
-MIN_TIME_BETWEEN_UPDATES = datetime.timedelta(seconds=60)
+MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=60)
 TIME_STR_FORMAT = "%H:%M"
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Required(CONF_TRIP_UPDATE_URL): cv.string,
-    vol.Optional(CONF_API_KEY): cv.string,
-    vol.Optional(CONF_X_API_KEY): cv.string,
-    vol.Optional(CONF_VEHICLE_POSITION_URL): cv.string,
-    vol.Optional(CONF_ROUTE_DELIMITER): cv.string,
-    vol.Optional(CONF_DEPARTURES): [{
-        vol.Required(CONF_NAME): cv.string,
-        vol.Required(CONF_STOP_ID): cv.string,
-        vol.Required(CONF_ROUTE): cv.string,
-        vol.Optional(CONF_ICON, default=DEFAULT_ICON): cv.string,
-        vol.Optional(CONF_SERVICE_TYPE, default=DEFAULT_SERVICE): cv.string
+PLATFORM_SCHEMA = Schema({
+    CONF_TRIP_UPDATE_URL: str,
+    Optional(CONF_API_KEY): str,
+    Optional(CONF_X_API_KEY): str,
+    CONF_VEHICLE_POSITION_URL: str,
+    Optional(CONF_ROUTE_DELIMITER): str,
+    CONF_DEPARTURES: [{
+        CONF_NAME: str,
+        CONF_STOP_ID: str,
+        CONF_ROUTE: str,
+        Optional(CONF_SERVICE_TYPE): str,
+        Optional(CONF_ICON): str
     }]
 })
 
-
 def due_in_minutes(timestamp):
     """Get the remaining minutes from now until a given datetime object."""
-    diff = timestamp - dt_util.now().replace(tzinfo=None)
+    diff = timestamp - datetime.now().replace(tzinfo=None)
     return int(diff.total_seconds() / 60)
 
-
-def setup_platform(hass, config, add_devices, discovery_info=None):
-    """Get the public transport sensor."""
-    
-    data = PublicTransportData(config.get(CONF_TRIP_UPDATE_URL), config.get(CONF_VEHICLE_POSITION_URL), config.get(CONF_ROUTE_DELIMITER), config.get(CONF_API_KEY), config.get(CONF_X_API_KEY))
-    sensors = []
-    for departure in config.get(CONF_DEPARTURES):
-        sensors.append(PublicTransportSensor(
-            data,
-            departure.get(CONF_STOP_ID),
-            departure.get(CONF_ROUTE),
-            departure.get(CONF_ICON),
-            departure.get(CONF_SERVICE_TYPE),
-            departure.get(CONF_NAME)
-        ))
-
-    add_devices(sensors)
-
-class PublicTransportSensor(Entity):
+#class PublicTransportSensor(Entity):
+class PublicTransportSensor(object):
     """Implementation of a public transport sensor."""
 
     def __init__(self, data, stop, route, icon, service_type, name):
@@ -95,7 +84,7 @@ class PublicTransportSensor(Entity):
 
     def _get_next_services(self):
         return self.data.info.get(self._route, {}).get(self._stop, [])
-
+       
     @property
     def state(self):
         """Return the state of the sensor."""
@@ -179,7 +168,7 @@ class PublicTransportData(object):
             self._headers = None
         self.info = {}
         
-    @Throttle(MIN_TIME_BETWEEN_UPDATES)
+    #@Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
         _LOGGER.info("trip_update_url: {}".format(self._trip_update_url))
         _LOGGER.info("vehicle_position_url: {}".format(self._vehicle_position_url))
@@ -205,6 +194,7 @@ class PublicTransportData(object):
         else:
             _LOGGER.error("updating trip data got {}:{}".format(response.status_code,response.content))
         feed.ParseFromString(response.content)
+
         departure_times = {}
 
         for entity in feed.entity:
@@ -220,7 +210,7 @@ class PublicTransportData(object):
                 else:
                     route_id = entity.trip_update.trip.route_id
                 
-                _LOGGER.debug("...Feed Route Id {} changed to {}".format(entity.trip_update.trip.route_id,route_id))
+                _LOGGER.debug("......Trip Route Id {} changed to {}".format(entity.trip_update.trip.route_id,route_id))
 
                 if route_id not in departure_times:
                     departure_times[route_id] = {}
@@ -236,10 +226,12 @@ class PublicTransportData(object):
                         stop_time = stop.arrival.time
                     # Ignore arrival times in the past
                     _LOGGER.debug("......Stop: {} Stop Sequence: {} Stop Time: {}".format(stop_id,stop.stop_sequence,stop_time))
-                    if due_in_minutes(datetime.datetime.fromtimestamp(stop_time)) >= 0:
-                        _LOGGER.debug("...Adding route id {}, trip id {}, stop id {}, stop time {}".format(route_id,entity.trip_update.trip.trip_id,stop_id,stop_time))
+                    #if due_in_minutes(datetime.datetime.fromtimestamp(stop_time)) >= 0:
+                    if due_in_minutes(datetime.fromtimestamp(stop_time)) >= 0:
+                        _LOGGER.debug(".........Adding route id {}, trip id {}, stop id {}, stop time {}".format(route_id,entity.trip_update.trip.trip_id,stop_id,stop_time))
                         details = StopDetails(
-                            datetime.datetime.fromtimestamp(stop_time),
+                            #datetime.datetime.fromtimestamp(stop_time),
+                            datetime.fromtimestamp(stop_time),
                             vehicle_positions.get(entity.trip_update.trip.trip_id)
                         )
                         departure_times[route_id][stop_id].append(details)
@@ -273,3 +265,54 @@ class PublicTransportData(object):
             positions[vehicle.trip.trip_id] = vehicle.position
             
         return positions
+
+#
+#
+#
+parser = argparse.ArgumentParser(description='Test script for ha-gtfs-rt-v2')
+parser.add_argument("-f", "--file", dest="file",
+                  help="Config file to use", metavar="FILE")
+parser.add_argument("-l", "--log", dest="log",
+                  help="Output file for log", metavar="FILE")
+parser.add_argument("-d", "--debug", dest="debug",
+                  help="Debug level: INFO (default) or DEBUG")
+args = vars(parser.parse_args())
+
+if args['file'] is None:
+    raise ValueError('Config file spec required.')
+if args['debug'] is None:
+    DEBUG_LEVEL = 'INFO'
+elif args['debug'].upper() == "INFO" or args['debug'].upper() == "DEBUG":
+    DEBUG_LEVEL = args['debug'].upper()
+else:
+    raise ValueError("Debug level must be INFO or DEBUG")
+if args['log'] is None:
+    logging.basicConfig(level=DEBUG_LEVEL)
+else:
+    logging.basicConfig(filename=args['log'],level=DEBUG_LEVEL)
+
+
+with open(args['file'], 'r') as test_yaml:
+    configuration = yaml.safe_load(test_yaml)
+try:
+    PLATFORM_SCHEMA.validate(configuration)
+    logging.info("Input file configuration is valid.")
+
+    data = PublicTransportData(configuration.get(CONF_TRIP_UPDATE_URL),configuration.get(CONF_VEHICLE_POSITION_URL),configuration.get(CONF_ROUTE_DELIMITER,''), 
+        configuration.get(CONF_API_KEY,None),configuration.get(CONF_X_API_KEY,None))
+
+    sensors = []
+    for departure in configuration[CONF_DEPARTURES]:
+        _LOGGER.info("Adding Sensor: Name: {}, route id: {}, stop id: {}".format(departure[CONF_NAME],departure[CONF_ROUTE],departure[CONF_STOP_ID]))
+        sensors.append(PublicTransportSensor(
+            data,
+            departure.get(CONF_STOP_ID),
+            departure.get(CONF_ROUTE),
+            departure.get(CONF_ICON, DEFAULT_ICON),
+            departure.get(CONF_SERVICE_TYPE, DEFAULT_SERVICE),
+            departure.get(CONF_NAME)
+       ))
+    test_yaml.close
+
+except SchemaError as se:
+    logging.info("Input file configuration invalid: {}".format(se))
