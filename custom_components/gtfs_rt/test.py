@@ -108,12 +108,12 @@ class PublicTransportSensor(object):
             ATTR_DIRECTION_ID: self._direction
         }
         if len(next_services) > 0:
-            attrs[ATTR_DUE_AT] = next_services[0].arrival_time.strftime('%I:%M %p') if len(next_services) > 0 else '-'
+            attrs[ATTR_DUE_AT] = next_services[0].arrival_time.strftime(TIME_STR_FORMAT) if len(next_services) > 0 else '-'
             if next_services[0].position:
                 attrs[ATTR_LATITUDE] = next_services[0].position.latitude
                 attrs[ATTR_LONGITUDE] = next_services[0].position.longitude
         if len(next_services) > 1:
-            attrs[ATTR_NEXT_UP] = next_services[1].arrival_time.strftime('%I:%M %p') if len(next_services) > 1 else '-'
+            attrs[ATTR_NEXT_UP] = next_services[1].arrival_time.strftime(TIME_STR_FORMAT) if len(next_services) > 1 else '-'
         return attrs
 
     @property
@@ -182,7 +182,7 @@ class PublicTransportData(object):
         _LOGGER.info("route_delimiter: {0}".format(self._route_delimiter))
         _LOGGER.info("header: {0}".format(self._headers))
 
-        positions = self._get_vehicle_positions() if self._vehicle_position_url else {}
+        positions = self._get_vehicle_positions() if self._vehicle_position_url else [{}, {}, {}]
         self._update_route_statuses(positions)
 
     def _update_route_statuses(self, vehicle_positions):
