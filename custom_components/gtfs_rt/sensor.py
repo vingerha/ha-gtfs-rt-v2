@@ -194,7 +194,7 @@ class PublicTransportData(object):
         _LOGGER.info("route_delimiter: {0}".format(self._route_delimiter))
         _LOGGER.info("header: {0}".format(self._headers))
 
-        positions = self._get_vehicle_positions() if self._vehicle_position_url else [{}, {}, {}]
+        positions = self._get_vehicle_positions() if self._vehicle_position_url else {}
         self._update_route_statuses(positions)
 
     def _update_route_statuses(self, vehicle_positions):
