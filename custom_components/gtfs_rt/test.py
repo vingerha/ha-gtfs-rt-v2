@@ -89,7 +89,7 @@ class PublicTransportSensor(object):
 
     def _get_next_services(self):
         return self.data.info.get(self._route, {}).get(self._direction, {}).get(self._stop, [])
-       
+
     @property
     def state(self):
         """Return the state of the sensor."""
@@ -201,9 +201,8 @@ class PublicTransportData(object):
         else:
             _LOGGER.error("updating trip data got {}:{}".format(response.status_code,response.content))
         feed.ParseFromString(response.content)
-
         departure_times = {}
-   
+
         for entity in feed.entity:
             if entity.HasField('trip_update'):
                 # If delimiter specified split the route id in the gtfs rt feed
@@ -215,13 +214,13 @@ class PublicTransportData(object):
                     else:
                           route_id = route_id_split[0]
 
-                    _LOGGER.debug("......Trip Route Id {} changed to {}".format(entity.trip_update.trip.route_id,route_id))
+                    _LOGGER.debug("...Feed Route Id {} changed to {}".format(entity.trip_update.trip.route_id,route_id))
                 else:
                     route_id = entity.trip_update.trip.route_id
                 
                 if route_id not in departure_times:
                     departure_times[route_id] = {}
-                
+
                 if entity.trip_update.trip.direction_id is not None:
                     direction_id = str(entity.trip_update.trip.direction_id)
                 else:
@@ -243,7 +242,6 @@ class PublicTransportData(object):
                     if due_in_minutes(datetime.fromtimestamp(stop_time)) >= 0:
                         _LOGGER.debug(".........Adding route id {}, trip id {}, direction id {}, stop id {}, stop time {}".format(route_id,entity.trip_update.trip.trip_id,entity.trip_update.trip.direction_id,stop_id,stop_time))
                         details = StopDetails(
-                            #datetime.datetime.fromtimestamp(stop_time),
                             datetime.fromtimestamp(stop_time),
                             vehicle_positions.get(entity.trip_update.trip.trip_id)
                         )

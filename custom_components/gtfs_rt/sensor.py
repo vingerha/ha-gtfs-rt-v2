@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 import logging
 import requests
 
@@ -37,7 +37,7 @@ DEFAULT_SERVICE = 'Service'
 DEFAULT_ICON = 'mdi:bus'
 DEFAULT_DIRECTION = '0'
 
-MIN_TIME_BETWEEN_UPDATES = datetime.timedelta(seconds=60)
+MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=60)
 TIME_STR_FORMAT = "%H:%M"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
@@ -251,18 +251,16 @@ class PublicTransportData(object):
                         stop_time = stop.arrival.time
                     _LOGGER.debug("......Stop: {} Stop Sequence: {} Stop Time: {}".format(stop_id,stop.stop_sequence,stop_time))
                     # Ignore arrival times in the past
-                    if due_in_minutes(datetime.datetime.fromtimestamp(stop_time)) >= 0:
+                    if due_in_minutes(datetime.fromtimestamp(stop_time)) >= 0:
                         _LOGGER.debug(".........Adding route id {}, trip id {}, direction id {}, stop id {}, stop time {}".format(route_id,entity.trip_update.trip.trip_id,entity.trip_update.trip.direction_id,stop_id,stop_time))
                         details = StopDetails(
-                            datetime.datetime.fromtimestamp(stop_time),
+                            datetime.fromtimestamp(stop_time),
                             vehicle_positions.get(entity.trip_update.trip.trip_id)
                         )
                         departure_times[route_id][direction_id][stop_id].append(details)
 
         # Sort by arrival time
         for route in departure_times:
-            for stop in departure_times[route]:
-                departure_times[route][stop].sort(key=lambda t: t.arrival_time)
             for direction in departure_times[route]:
                 for stop in departure_times[route][direction]:
                     departure_times[route][direction][stop].sort(key=lambda t: t.arrival_time)
