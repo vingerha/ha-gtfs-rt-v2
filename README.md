@@ -51,7 +51,7 @@ sensor:
 # Example entry for Long Island Rail Road, New York
 
 sensor:
-- platform: gtfs_rt
+  - platform: gtfs_rt
     trip_update_url: 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/lirr%2Fgtfs-lirr'
     vehicle_position_url: 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/lirr%2Fgtfs-lirr'
     x_api_key: <insert your API key here - see https://new.mta.info/developers>
