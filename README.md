@@ -52,10 +52,10 @@ sensor:
     vehicle_position_url: 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/lirr%2Fgtfs-lirr'
     x_api_key: <insert your API key here - see https://new.mta.info/developers>
     departures:
-    - name: Bellmore Station from Penn Station
+    - name: Bellmore Station to Penn Station
       route: '1'
       stopid: '16'
-      directionid: '0'
+      directionid: '1'
       icon: mdi:train
       service_type: 'train'
 ```
