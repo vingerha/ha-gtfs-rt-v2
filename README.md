@@ -45,7 +45,9 @@ sensor:
       stopid: 4843
       icon: mdi:bus
       service_type: Bus
+```
 
+```yaml
 # Example entry for Long Island Rail Road, New York
   - platform: gtfs_rt
     trip_update_url: 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/lirr%2Fgtfs-lirr'
