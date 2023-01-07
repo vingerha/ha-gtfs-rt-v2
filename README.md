@@ -45,6 +45,19 @@ sensor:
       stopid: 4843
       icon: mdi:bus
       service_type: Bus
+
+# Example entry for Long Island Rail Road, New York
+  - platform: gtfs_rt
+    trip_update_url: 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/lirr%2Fgtfs-lirr'
+    vehicle_position_url: 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/lirr%2Fgtfs-lirr'
+    x_api_key: <insert your API key here - see https://new.mta.info/developers>
+    departures:
+    - name: Bellmore Station from Penn Station
+      route: '1'
+      stopid: '16'
+      directionid: '0'
+      icon: mdi:train
+      service_type: 'train'
 ```
 
 Configuration variables:
