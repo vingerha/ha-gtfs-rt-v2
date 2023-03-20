@@ -52,11 +52,14 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
                 vol.Required(CONF_STOP_ID): cv.string,
                 vol.Required(CONF_ROUTE): cv.string,
                 vol.Optional(
-                    CONF_DIRECTION_ID, default=DEFAULT_DIRECTION
+                    CONF_DIRECTION_ID,
+                    default=DEFAULT_DIRECTION,  # type: ignore
                 ): str,
-                vol.Optional(CONF_ICON, default=DEFAULT_ICON): cv.string,
                 vol.Optional(
-                    CONF_SERVICE_TYPE, default=DEFAULT_SERVICE
+                    CONF_ICON, default=DEFAULT_ICON  # type: ignore
+                ): cv.string,
+                vol.Optional(
+                    CONF_SERVICE_TYPE, default=DEFAULT_SERVICE  # type: ignore
                 ): cv.string,
             }
         ],
@@ -232,7 +235,7 @@ class PublicTransportData(object):
     def __init__(
         self,
         trip_update_url,
-        vehicle_position_url=None,
+        vehicle_position_url: str = "",
         route_delimiter=None,
         api_key=None,
         x_api_key=None,
@@ -259,7 +262,9 @@ class PublicTransportData(object):
         _LOGGER.info("header: {0}".format(self._headers))
 
         positions = (
-            self._get_vehicle_positions() if self._vehicle_position_url else {}
+            self._get_vehicle_positions()
+            if self._vehicle_position_url != ""
+            else {}
         )
         self._update_route_statuses(positions)
 
@@ -272,7 +277,7 @@ class PublicTransportData(object):
                 self.arrival_time = arrival_time
                 self.position = position
 
-        feed = gtfs_realtime_pb2.FeedMessage()
+        feed = gtfs_realtime_pb2.FeedMessage()  # type: ignore
         response = requests.get(self._trip_update_url, headers=self._headers)
         if response.status_code == 200:
             _LOGGER.info(
@@ -335,7 +340,8 @@ class PublicTransportData(object):
                         stop_id
                     ):
                         departure_times[route_id][direction_id][stop_id] = []
-                    # Use stop arrival time; fall back on stop departure time if not available
+                    # Use stop arrival time;
+                    # fall back on departure time if not available
                     if stop.arrival.time == 0:
                         stop_time = stop.departure.time
                     else:
@@ -380,7 +386,7 @@ class PublicTransportData(object):
     def _get_vehicle_positions(self):
         from google.transit import gtfs_realtime_pb2
 
-        feed = gtfs_realtime_pb2.FeedMessage()
+        feed = gtfs_realtime_pb2.FeedMessage()  # type: ignore
         response = requests.get(
             self._vehicle_position_url, headers=self._headers
         )
