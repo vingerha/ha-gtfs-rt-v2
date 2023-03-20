@@ -3,7 +3,7 @@
 This project contains a new sensor that provides real-time departure data for
 local transit systems that provide gtfs feeds.
 
-It is based on the excellent work that has been done previously by @zacs and @phardy.  Originally inspired by a desire to make the existing code work with realtime data for trains and buses provided by Translink in Queensland, Australia (who have unique route ids for each route/calendar combination) this version also contains a number of other improvements. 
+It is based on the excellent work that has been done previously by @zacs and @phardy.  Originally inspired by a desire to make the existing code work with realtime data for trains and buses provided by Translink in Queensland, Australia (who have unique route ids for each route/calendar combination) this version also contains a number of other improvements.
 
 ## Installation (HACS) - Recommended
 0. Have [HACS](https://hacs.xyz/) installed, this will allow you to easily update
@@ -96,9 +96,11 @@ GTFS providers should also publish a zip file containing static data, including 
 
 ## Troubleshooting
 
-As it can be time-consuming doing trouble shooting in Home Assistant a test.py script it provided that is almost identical code but can be run in any python 3 environment.  It uses an input yaml file that is in the same format as the configuration file used in Home Assistant, making it quick and easily many different GTFS-RT provider, route and stop configurations (see test_translink.yaml for an example).  The output can optionally be redirected to a text file
+As it can be time-consuming doing trouble shooting in Home Assistant a test.py script is provided that is almost identical code but can be run in any python 3 environment.  It uses an input yaml file that is in the same format as the configuration file used in Home Assistant, making it quick and easily test many different GTFS-RT providers, routes and stop configurations (see test_translink.yaml for an example).  The output can optionally be redirected to a text file.
 
+```
 Usage: test.py -f <yaml file> -d INFO|DEBUG { -l  outfile file  }
+```
 
 ## Reporting an Issue
 
