@@ -98,8 +98,9 @@ GTFS providers should also publish a zip file containing static data, including 
 
 As it can be time-consuming doing trouble shooting in Home Assistant a test.py script is provided that is almost identical code but can be run in any python 3 environment.  It uses an input yaml file that is in the same format as the configuration file used in Home Assistant, making it quick and easily test many different GTFS-RT providers, routes and stop configurations (see test_translink.yaml for an example).  The output can optionally be redirected to a text file.
 
+Usage:
 ```
-Usage: test.py -f <yaml file> -d INFO|DEBUG { -l  outfile file  }
+test.py -f <yaml file> -d INFO|DEBUG { -l <outfile log file> }
 ```
 
 ## Reporting an Issue
