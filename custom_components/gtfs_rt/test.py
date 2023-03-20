@@ -404,67 +404,76 @@ class PublicTransportData(object):
 #
 #
 #
-parser = argparse.ArgumentParser(description="Test script for ha-gtfs-rt-v2")
-parser.add_argument(
-    "-f", "--file", dest="file", help="Config file to use", metavar="FILE"
-)
-parser.add_argument(
-    "-l", "--log", dest="log", help="Output file for log", metavar="FILE"
-)
-parser.add_argument(
-    "-d", "--debug", dest="debug", help="Debug level: INFO (default) or DEBUG"
-)
-args = vars(parser.parse_args())
 
-if args["file"] is None:
-    raise ValueError("Config file spec required.")
-if args["debug"] is None:
-    DEBUG_LEVEL = "INFO"
-elif args["debug"].upper() == "INFO" or args["debug"].upper() == "DEBUG":
-    DEBUG_LEVEL = args["debug"].upper()
-else:
-    raise ValueError("Debug level must be INFO or DEBUG")
-if args["log"] is None:
-    logging.basicConfig(level=DEBUG_LEVEL)
-else:
-    logging.basicConfig(filename=args["log"], filemode="w", level=DEBUG_LEVEL)
-
-
-with open(args["file"], "r") as test_yaml:
-    configuration = yaml.safe_load(test_yaml)
-try:
-    PLATFORM_SCHEMA.validate(configuration)
-    logging.info("Input file configuration is valid.")
-
-    data = PublicTransportData(
-        configuration.get(CONF_TRIP_UPDATE_URL),
-        configuration.get(CONF_VEHICLE_POSITION_URL),
-        configuration.get(CONF_ROUTE_DELIMITER),
-        configuration.get(CONF_API_KEY, None),
-        configuration.get(CONF_X_API_KEY, None),
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Test script for ha-gtfs-rt-v2"
     )
+    parser.add_argument(
+        "-f", "--file", dest="file", help="Config file to use", metavar="FILE"
+    )
+    parser.add_argument(
+        "-l", "--log", dest="log", help="Output file for log", metavar="FILE"
+    )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        dest="debug",
+        help="Debug level: INFO (default) or DEBUG",
+    )
+    args = vars(parser.parse_args())
 
-    sensors = []
-    for departure in configuration[CONF_DEPARTURES]:
-        _LOGGER.info(
-            "Adding Sensor: Name: {}, route id: {}, direction id: {}".format(
-                departure[CONF_NAME],
-                departure[CONF_ROUTE],
-                departure[CONF_STOP_ID],
-            )
+    if args["file"] is None:
+        raise ValueError("Config file spec required.")
+    if args["debug"] is None:
+        DEBUG_LEVEL = "INFO"
+    elif args["debug"].upper() == "INFO" or args["debug"].upper() == "DEBUG":
+        DEBUG_LEVEL = args["debug"].upper()
+    else:
+        raise ValueError("Debug level must be INFO or DEBUG")
+    if args["log"] is None:
+        logging.basicConfig(level=DEBUG_LEVEL)
+    else:
+        logging.basicConfig(
+            filename=args["log"], filemode="w", level=DEBUG_LEVEL
         )
-        sensors.append(
-            PublicTransportSensor(
-                data,
-                departure.get(CONF_STOP_ID),
-                departure.get(CONF_ROUTE),
-                departure.get(CONF_DIRECTION_ID, DEFAULT_DIRECTION),
-                departure.get(CONF_ICON, DEFAULT_ICON),
-                departure.get(CONF_SERVICE_TYPE, DEFAULT_SERVICE),
-                departure.get(CONF_NAME),
-            )
-        )
-    test_yaml.close
 
-except SchemaError as se:
-    logging.info("Input file configuration invalid: {}".format(se))
+    with open(args["file"], "r") as test_yaml:
+        configuration = yaml.safe_load(test_yaml)
+    try:
+        PLATFORM_SCHEMA.validate(configuration)
+        logging.info("Input file configuration is valid.")
+
+        data = PublicTransportData(
+            configuration.get(CONF_TRIP_UPDATE_URL),
+            configuration.get(CONF_VEHICLE_POSITION_URL),
+            configuration.get(CONF_ROUTE_DELIMITER),
+            configuration.get(CONF_API_KEY, None),
+            configuration.get(CONF_X_API_KEY, None),
+        )
+
+        sensors = []
+        for departure in configuration[CONF_DEPARTURES]:
+            _LOGGER.info(
+                "Adding Sensor: Name: {}, route id: {}, direction id: {}"
+                .format(
+                    departure[CONF_NAME],
+                    departure[CONF_ROUTE],
+                    departure[CONF_STOP_ID],
+                )
+            )
+            sensors.append(
+                PublicTransportSensor(
+                    data,
+                    departure.get(CONF_STOP_ID),
+                    departure.get(CONF_ROUTE),
+                    departure.get(CONF_DIRECTION_ID, DEFAULT_DIRECTION),
+                    departure.get(CONF_ICON, DEFAULT_ICON),
+                    departure.get(CONF_SERVICE_TYPE, DEFAULT_SERVICE),
+                    departure.get(CONF_NAME),
+                )
+            )
+        test_yaml.close
+
+    except SchemaError as se:
+        logging.info("Input file configuration invalid: {}".format(se))
