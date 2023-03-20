@@ -235,7 +235,7 @@ class PublicTransportData(object):
     def __init__(
         self,
         trip_update_url,
-        vehicle_position_url: str = "",
+        vehicle_position_url="",
         route_delimiter=None,
         api_key=None,
         x_api_key=None,

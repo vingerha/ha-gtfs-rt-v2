@@ -2,14 +2,14 @@
 Script for quicker and easier testing of GTFS-RT-V2 outside of Home Assistant.
 Usage: test.py -f <yaml file> -d INFO|DEBUG { -l <outfile log file> }
 
-<yaml file> contains the sensor configuration from HA.  See test_translink.yaml for example
+<yaml file> contains the sensor configuration from HA.
+See test_translink.yaml for example
 <output file> is a text file for output
 """
 import argparse
 import logging
 import sys
 from datetime import datetime, timedelta
-from urllib.request import Request, urlopen
 
 import requests
 import yaml
@@ -211,7 +211,7 @@ class PublicTransportData(object):
     def __init__(
         self,
         trip_update_url,
-        vehicle_position_url=None,
+        vehicle_position_url="",
         route_delimiter=None,
         api_key=None,
         x_api_key=None,
@@ -238,7 +238,9 @@ class PublicTransportData(object):
         _LOGGER.info("header: {0}".format(self._headers))
 
         positions = (
-            self._get_vehicle_positions() if self._vehicle_position_url else {}
+            self._get_vehicle_positions()
+            if self._vehicle_position_url != ""
+            else {}
         )
         self._update_route_statuses(positions)
 
@@ -251,7 +253,7 @@ class PublicTransportData(object):
                 self.arrival_time = arrival_time
                 self.position = position
 
-        feed = gtfs_realtime_pb2.FeedMessage()
+        feed = gtfs_realtime_pb2.FeedMessage()  # type: ignore
         response = requests.get(self._trip_update_url, headers=self._headers)
         if response.status_code == 200:
             _LOGGER.info(
@@ -314,7 +316,8 @@ class PublicTransportData(object):
                         stop_id
                     ):
                         departure_times[route_id][direction_id][stop_id] = []
-                    # Use stop arrival time; fall back on stop departure time if not available
+                    # Use stop arrival time;
+                    # fall back on stop departure time if not available
                     if stop.arrival.time == 0:
                         stop_time = stop.departure.time
                     else:
@@ -359,7 +362,7 @@ class PublicTransportData(object):
     def _get_vehicle_positions(self):
         from google.transit import gtfs_realtime_pb2
 
-        feed = gtfs_realtime_pb2.FeedMessage()
+        feed = gtfs_realtime_pb2.FeedMessage()  # type: ignore
         response = requests.get(
             self._vehicle_position_url, headers=self._headers
         )
