@@ -12,39 +12,29 @@ import sys
 
 import yaml
 from schema import Optional, Schema, SchemaError
-from sensor import PublicTransportData, PublicTransportSensor
+from sensor import (
+    CONF_API_KEY,
+    CONF_DEPARTURES,
+    CONF_DIRECTION_ID,
+    CONF_ICON,
+    CONF_ROUTE,
+    CONF_ROUTE_DELIMITER,
+    CONF_SERVICE_TYPE,
+    CONF_STOP_ID,
+    CONF_TRIP_UPDATE_URL,
+    CONF_VEHICLE_POSITION_URL,
+    CONF_X_API_KEY,
+    DEFAULT_DIRECTION,
+    DEFAULT_ICON,
+    DEFAULT_SERVICE,
+    PublicTransportData,
+    PublicTransportSensor,
+)
 
 sys.path.append("lib")
 _LOGGER = logging.getLogger(__name__)
 
-ATTR_STOP_ID = "Stop ID"
-ATTR_ROUTE = "Route"
-ATTR_DIRECTION_ID = "Direction ID"
-ATTR_DUE_IN = "Due in"
-ATTR_DUE_AT = "Due at"
-ATTR_NEXT_UP = "Next Service"
-ATTR_ICON = "Icon"
-ATTR_LATITUDE = "Latitude"
-ATTR_LONGITUDE = "Longitude"
-
-CONF_API_KEY = "api_key"
-CONF_X_API_KEY = "x_api_key"
-CONF_STOP_ID = "stopid"
-CONF_ROUTE = "route"
-CONF_DIRECTION_ID = "directionid"
-CONF_DEPARTURES = "departures"
-CONF_TRIP_UPDATE_URL = "trip_update_url"
-CONF_VEHICLE_POSITION_URL = "vehicle_position_url"
-CONF_ROUTE_DELIMITER = "route_delimiter"
-CONF_ICON = "icon"
-CONF_SERVICE_TYPE = "service_type"
 CONF_NAME = "name"
-
-DEFAULT_SERVICE = "Service"
-DEFAULT_ICON = "mdi:bus"
-DEFAULT_DIRECTION = "0"
-
-TIME_STR_FORMAT = "%H:%M"
 
 PLATFORM_SCHEMA = Schema(
     {
