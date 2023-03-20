@@ -473,7 +473,6 @@ if __name__ == "__main__":
                     departure.get(CONF_NAME),
                 )
             )
-        test_yaml.close
 
     except SchemaError as se:
         logging.info("Input file configuration invalid: {}".format(se))
