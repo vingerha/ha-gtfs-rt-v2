@@ -73,6 +73,24 @@ def due_in_minutes(timestamp):
     return int(diff.total_seconds() / 60)
 
 
+def log_info(data: list, indent_level: int) -> None:
+    indents = "..." * indent_level
+    info_str = f"{indents}{': '.join(str(x) for x in data)}"
+    _LOGGER.info(info_str)
+
+
+def log_error(data: list, indent_level: int) -> None:
+    indents = "..." * indent_level
+    info_str = f"{indents}{': '.join(str(x) for x in data)}"
+    _LOGGER.error(info_str)
+
+
+def log_debug(data: list, indent_level: int) -> None:
+    indents = "..." * indent_level
+    info_str = f"{indents}{' '.join(str(x) for x in data)}"
+    _LOGGER.debug(info_str)
+
+
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Get the public transport sensor."""
 
@@ -179,54 +197,47 @@ class PublicTransportSensor(Entity):
     def update(self):
         """Get the latest data from opendata.ch and update the states."""
         self.data.update()
-        _LOGGER.info("Sensor Update:")
-        _LOGGER.info("...Name: {0}".format(self._name))
-        _LOGGER.info("...{0}: {1}".format(ATTR_ROUTE, self._route))
-        _LOGGER.info("...{0}: {1}".format(ATTR_STOP_ID, self._stop))
-        _LOGGER.info("...{0}: {1}".format(ATTR_DIRECTION_ID, self._direction))
-        _LOGGER.info("...{0}: {1}".format(ATTR_ICON, self._icon))
-        _LOGGER.info("...Service Type: {0}".format(self._service_type))
-        _LOGGER.info(
-            "...{0}: {1}".format(
-                "unit_of_measurement", self.unit_of_measurement
-            )
-        )
-        _LOGGER.info("...{0}: {1}".format(ATTR_DUE_IN, self.state))
+        log_info(["Sensor Update:"], 0)
+        log_info(["Name", self._name], 1)
+        log_info([ATTR_ROUTE, self._route], 1)
+        log_info([ATTR_STOP_ID, self._stop], 1)
+        log_info([ATTR_DIRECTION_ID, self._direction], 1)
+        log_info([ATTR_ICON, self._icon], 1)
+        log_info(["Service Type", self._service_type], 1)
+        log_info(["unit_of_measurement", self.unit_of_measurement], 1)
+        log_info([ATTR_DUE_IN, self.state], 1)
         try:
-            _LOGGER.info(
-                "...{0}: {1}".format(
-                    ATTR_DUE_AT, self.extra_state_attributes[ATTR_DUE_AT]
-                )
+            log_info(
+                [ATTR_DUE_AT, self.extra_state_attributes[ATTR_DUE_AT]], 1
             )
-        except:
-            _LOGGER.info("...{0} not defined".format(ATTR_DUE_AT))
+        except:  # TODO - fix bare except, find out what error expected
+            log_info([ATTR_DUE_AT, "not defined"], 1)
         try:
-            _LOGGER.info(
-                "...{0}: {1}".format(
-                    ATTR_LATITUDE, self.extra_state_attributes[ATTR_LATITUDE]
-                )
+            log_info(
+                [ATTR_LATITUDE, self.extra_state_attributes[ATTR_LATITUDE]], 1
             )
-        except:
-            _LOGGER.info("...{0} not defined".format(ATTR_LATITUDE))
+
+        except:  # TODO - fix bare except, find out what error expected
+            log_info([ATTR_LATITUDE, "not defined"], 1)
         try:
-            _LOGGER.info(
-                "...{0}: {1}".format(
-                    ATTR_LONGITUDE, self.extra_state_attributes[ATTR_LONGITUDE]
-                )
+            log_info(
+                [ATTR_LONGITUDE, self.extra_state_attributes[ATTR_LONGITUDE]],
+                1,
             )
-        except:
-            _LOGGER.info("...{0} not defined".format(ATTR_LONGITUDE))
+
+        except:  # TODO - fix bare except, find out what error expected
+            log_info([ATTR_LONGITUDE, "not defined"], 1)
         try:
-            _LOGGER.info(
-                "...Next {0}: {1}".format(
-                    self._service_type,
+            log_info(
+                [
+                    f"Next {self._service_type}",
                     self.extra_state_attributes["Next " + self._service_type],
-                )
+                ],
+                1,
             )
-        except:
-            _LOGGER.info(
-                "...{0} not defined".format("Next " + self._service_type)
-            )
+
+        except:  # TODO - fix bare except, find out what error expected
+            log_info(["Next " + self._service_type, "not defined"], 1)
 
 
 class PublicTransportData(object):
@@ -254,12 +265,10 @@ class PublicTransportData(object):
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
-        _LOGGER.info("trip_update_url: {}".format(self._trip_update_url))
-        _LOGGER.info(
-            "vehicle_position_url: {}".format(self._vehicle_position_url)
-        )
-        _LOGGER.info("route_delimiter: {0}".format(self._route_delimiter))
-        _LOGGER.info("header: {0}".format(self._headers))
+        log_info(["trip_update_url", self._trip_update_url], 0)
+        log_info(["vehicle_position_url", self._vehicle_position_url], 0)
+        log_info(["route_delimiter", self._route_delimiter], 0)
+        log_info(["header", self._headers], 0)
 
         positions = (
             self._get_vehicle_positions()
@@ -297,15 +306,20 @@ class PublicTransportData(object):
         for entity in feed.entity:
             if entity.HasField("trip_update"):
                 # If delimiter specified split the route id in the gtfs rt feed
-                _LOGGER.debug(
-                    "...Received Trip Id {} Route Id: {} direction id {} Start"
-                    " Time: {} Start Date: {}".format(
+                log_debug(
+                    [
+                        "Received Trip Id",
                         entity.trip_update.trip.trip_id,
+                        "Route Id:",
                         entity.trip_update.trip.route_id,
+                        "direction id",
                         entity.trip_update.trip.direction_id,
+                        "Start Time:",
                         entity.trip_update.trip.start_time,
+                        "Start Date:",
                         entity.trip_update.trip.start_date,
-                    )
+                    ],
+                    1,
                 )
                 if self._route_delimiter is not None:
                     route_id_split = entity.trip_update.trip.route_id.split(
@@ -315,12 +329,16 @@ class PublicTransportData(object):
                         route_id = entity.trip_update.trip.route_id
                     else:
                         route_id = route_id_split[0]
-
-                    _LOGGER.debug(
-                        "...Feed Route Id {} changed to {}".format(
-                            entity.trip_update.trip.route_id, route_id
-                        )
+                    log_debug(
+                        [
+                            "Feed Route ID",
+                            entity.trip_update.trip.route_id,
+                            "changed to",
+                            route_id,
+                        ],
+                        1,
                     )
+
                 else:
                     route_id = entity.trip_update.trip.route_id
 
@@ -346,23 +364,35 @@ class PublicTransportData(object):
                         stop_time = stop.departure.time
                     else:
                         stop_time = stop.arrival.time
-                    _LOGGER.debug(
-                        "......Stop: {} Stop Sequence: {} Stop Time: {}"
-                        .format(stop_id, stop.stop_sequence, stop_time)
+                    log_debug(
+                        [
+                            "Stop:",
+                            stop_id,
+                            "Stop Sequence:",
+                            stop.stop_sequence,
+                            "Stop Time:",
+                            stop_time,
+                        ],
+                        2,
                     )
                     # Ignore arrival times in the past
                     if due_in_minutes(datetime.fromtimestamp(stop_time)) >= 0:
-                        _LOGGER.debug(
-                            ".........Adding route id {}, trip id {},"
-                            " direction id {}, stop id {}, stop time {}"
-                            .format(
+                        log_debug(
+                            [
+                                "Adding route id",
                                 route_id,
+                                "trip id",
                                 entity.trip_update.trip.trip_id,
+                                "direction id",
                                 entity.trip_update.trip.direction_id,
+                                "stop id",
                                 stop_id,
+                                "stop time",
                                 stop_time,
-                            )
+                            ],
+                            3,
                         )
+
                         details = StopDetails(
                             datetime.fromtimestamp(stop_time),
                             vehicle_positions.get(
@@ -411,15 +441,18 @@ class PublicTransportData(object):
             if not vehicle.trip.trip_id:
                 # Vehicle is not in service
                 continue
-
-            _LOGGER.debug(
-                "......Adding position for trip id {} position latitude {}"
-                " longitude {} ".format(
+            log_debug(
+                [
+                    "Adding position for trip id",
                     vehicle.trip.trip_id,
+                    "position latitude",
                     vehicle.position.latitude,
+                    "longitude",
                     vehicle.position.longitude,
-                )
+                ],
+                2,
             )
+
             positions[vehicle.trip.trip_id] = vehicle.position
 
         return positions
