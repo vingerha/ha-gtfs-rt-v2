@@ -228,27 +228,29 @@ class PublicTransportSensor(Entity):
         log_info(["Service Type", self._service_type], 1)
         log_info(["unit_of_measurement", self.unit_of_measurement], 1)
         log_info([ATTR_DUE_IN, self.state], 1)
+
         try:
             log_info(
                 [ATTR_DUE_AT, self.extra_state_attributes[ATTR_DUE_AT]], 1
             )
-        except:  # TODO - fix bare except, find out what error expected
+        except KeyError:
             log_info([ATTR_DUE_AT, "not defined"], 1)
+
         try:
             log_info(
                 [ATTR_LATITUDE, self.extra_state_attributes[ATTR_LATITUDE]], 1
             )
-
-        except:  # TODO - fix bare except, find out what error expected
+        except KeyError:
             log_info([ATTR_LATITUDE, "not defined"], 1)
+
         try:
             log_info(
                 [ATTR_LONGITUDE, self.extra_state_attributes[ATTR_LONGITUDE]],
                 1,
             )
-
-        except:  # TODO - fix bare except, find out what error expected
+        except KeyError:
             log_info([ATTR_LONGITUDE, "not defined"], 1)
+
         try:
             log_info(
                 [
@@ -257,8 +259,7 @@ class PublicTransportSensor(Entity):
                 ],
                 1,
             )
-
-        except:  # TODO - fix bare except, find out what error expected
+        except KeyError:
             log_info(["Next " + self._service_type, "not defined"], 1)
 
 
