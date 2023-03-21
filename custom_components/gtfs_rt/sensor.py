@@ -123,7 +123,7 @@ def get_gtfs_feed_entities(url: str, headers, label: str):
     feed = gtfs_realtime_pb2.FeedMessage()  # type: ignore
 
     # TODO add timeout to requests call
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=20)
     if response.status_code == 200:
         log_info([f"Successfully updated {label}", response.status_code], 0)
     else:
