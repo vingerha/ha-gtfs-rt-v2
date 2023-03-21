@@ -5,6 +5,7 @@ import homeassistant.helpers.config_validation as cv
 import homeassistant.util.dt as dt_util
 import requests
 import voluptuous as vol
+from google.transit import gtfs_realtime_pb2
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import ATTR_LATITUDE, ATTR_LONGITUDE, CONF_NAME
 from homeassistant.helpers.entity import Entity
@@ -116,6 +117,27 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
         )
 
     add_devices(sensors)
+
+
+def get_gtfs_feed_entities(url: str, headers, label: str):
+    feed = gtfs_realtime_pb2.FeedMessage()  # type: ignore
+
+    # TODO add timeout to requests call
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        log_info([f"Successfully updated {label}", response.status_code], 0)
+    else:
+        log_error(
+            [
+                f"Updating {label} got",
+                response.status_code,
+                response.content,
+            ],
+            0,
+        )
+
+    feed.ParseFromString(response.content)
+    return feed.entity
 
 
 class PublicTransportSensor(Entity):
@@ -279,31 +301,19 @@ class PublicTransportData(object):
 
     def _update_route_statuses(self, vehicle_positions):
         """Get the latest data."""
-        from google.transit import gtfs_realtime_pb2
 
         class StopDetails:
             def __init__(self, arrival_time, position):
                 self.arrival_time = arrival_time
                 self.position = position
 
-        feed = gtfs_realtime_pb2.FeedMessage()  # type: ignore
-        response = requests.get(self._trip_update_url, headers=self._headers)
-        if response.status_code == 200:
-            _LOGGER.info(
-                "Successfully updated trip data - {}".format(
-                    response.status_code
-                )
-            )
-        else:
-            _LOGGER.error(
-                "updating trip data got {}:{}".format(
-                    response.status_code, response.content
-                )
-            )
-        feed.ParseFromString(response.content)
         departure_times = {}
 
-        for entity in feed.entity:
+        feed_entities = get_gtfs_feed_entities(
+            url=self._trip_update_url, headers=self._headers, label="trip data"
+        )
+
+        for entity in feed_entities:
             if entity.HasField("trip_update"):
                 # If delimiter specified split the route id in the gtfs rt feed
                 log_debug(
@@ -414,28 +424,14 @@ class PublicTransportData(object):
         self.info = departure_times
 
     def _get_vehicle_positions(self):
-        from google.transit import gtfs_realtime_pb2
-
-        feed = gtfs_realtime_pb2.FeedMessage()  # type: ignore
-        response = requests.get(
-            self._vehicle_position_url, headers=self._headers
-        )
-        if response.status_code == 200:
-            _LOGGER.info(
-                "Successfully updated vehicle positions - {}".format(
-                    response.status_code
-                )
-            )
-        else:
-            _LOGGER.error(
-                "updating vehicle positions got {}:{}.".format(
-                    response.status_code, response.content
-                )
-            )
-        feed.ParseFromString(response.content)
         positions = {}
+        feed_entities = get_gtfs_feed_entities(
+            url=self._vehicle_position_url,
+            headers=self._headers,
+            label="vehicle positions",
+        )
 
-        for entity in feed.entity:
+        for entity in feed_entities:
             vehicle = entity.vehicle
 
             if not vehicle.trip.trip_id:
