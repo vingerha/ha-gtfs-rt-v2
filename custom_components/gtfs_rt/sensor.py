@@ -75,19 +75,19 @@ def due_in_minutes(timestamp):
 
 
 def log_info(data: list, indent_level: int) -> None:
-    indents = "..." * indent_level
+    indents = "   " * indent_level
     info_str = f"{indents}{': '.join(str(x) for x in data)}"
     _LOGGER.info(info_str)
 
 
 def log_error(data: list, indent_level: int) -> None:
-    indents = "..." * indent_level
+    indents = "   " * indent_level
     info_str = f"{indents}{': '.join(str(x) for x in data)}"
     _LOGGER.error(info_str)
 
 
 def log_debug(data: list, indent_level: int) -> None:
-    indents = "..." * indent_level
+    indents = "   " * indent_level
     info_str = f"{indents}{' '.join(str(x) for x in data)}"
     _LOGGER.debug(info_str)
 
@@ -316,14 +316,14 @@ class PublicTransportData(object):
 
         for entity in feed_entities:
             if entity.HasField("trip_update"):
-                # If delimiter specified split the route id in the gtfs rt feed
+                # If delimiter specified split the route ID in the gtfs rt feed
                 log_debug(
                     [
-                        "Received Trip Id",
+                        "Received Trip ID",
                         entity.trip_update.trip.trip_id,
-                        "Route Id:",
+                        "Route ID:",
                         entity.trip_update.trip.route_id,
-                        "direction id",
+                        "direction ID",
                         entity.trip_update.trip.direction_id,
                         "Start Time:",
                         entity.trip_update.trip.start_time,
@@ -390,13 +390,13 @@ class PublicTransportData(object):
                     if due_in_minutes(datetime.fromtimestamp(stop_time)) >= 0:
                         log_debug(
                             [
-                                "Adding route id",
+                                "Adding route ID",
                                 route_id,
-                                "trip id",
+                                "trip ID",
                                 entity.trip_update.trip.trip_id,
-                                "direction id",
+                                "direction ID",
                                 entity.trip_update.trip.direction_id,
-                                "stop id",
+                                "stop ID",
                                 stop_id,
                                 "stop time",
                                 stop_time,
@@ -440,7 +440,7 @@ class PublicTransportData(object):
                 continue
             log_debug(
                 [
-                    "Adding position for trip id",
+                    "Adding position for trip ID",
                     vehicle.trip.trip_id,
                     "position latitude",
                     vehicle.position.latitude,
