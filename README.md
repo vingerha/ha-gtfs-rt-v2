@@ -1,4 +1,4 @@
-# Home Assistant GTFS RealTime (rt)
+# Home Assistant GTFS Realtime (rt)
 
 This project contains a new sensor that provides real-time departure data for
 local transit systems that provide gtfs feeds.
@@ -8,7 +8,7 @@ It is based on the excellent work that has been done previously by @zacs and @ph
 ## Installation (HACS) - Recommended
 0. Have [HACS](https://hacs.xyz/) installed, this will allow you to easily update
 1. Add `https://github.com/mark1foley/ha-gtfs-rt-v2` as a [custom repository](https://hacs.xyz/docs/faq/custom_repositories/) as Type: Integration
-2. Click install under "GTFS-Realtime", restart your instance.
+2. Click install under "GTFS Realtime", then restart your instance for the installation to take effect.
 
 ## Installation (Manual)
 1. Download this repository as a ZIP (green button, top right) and unzip the archive
@@ -85,18 +85,14 @@ Configuration variables:
 
 ## Finding Feeds
 
-[Transit Feeds](https://transitfeeds.com) is a fairly good source for realtime
-gtfs feeds. Search for your city, and then look for a feed that is tagged with
-'GTFS-RealTime'. There should be an 'official url' in the side bar that you can
-use. Routes and stops can be found by clicking on the regular gtfs feed, and
-finding the id for the stop you are interested in. Please feel free to message
-me or open an issue if you find other good sources.
+[The Mobility Database](https://database.mobilitydata.org/) is a good source for realtime
+gtfs feeds. Though the database is currently lacking a web interface, you can filter the [csv](https://bit.ly/catalogs-csv) on gtfs-rt in the data_type column and then further by location in order to find gtfs-rt feeds near you.
 
-GTFS providers should also publish a zip file containing static data, including route and stop information.  For example [Translink SEQ ZIP](https://gtfsrt.api.translink.com.au/GTFS/SEQ_GTFS.zip).  The route and stop ids you need to configure the realtime feed in HA are provided in this file.
+GTFS providers should also publish a zip file containing static data, including route and stop information. The same CSV file should contain a link to the static ZIP file. For example [Translink SEQ ZIP](https://gtfsrt.api.translink.com.au/GTFS/SEQ_GTFS.zip).  The route and stop IDs you need to configure the realtime feed in Home Assistant configuration are provided in this file.
 
 ## Troubleshooting
 
-As it can be time-consuming doing trouble shooting in Home Assistant a test.py script is provided that is almost identical code but can be run in any python 3 environment.  It uses an input yaml file that is in the same format as the configuration file used in Home Assistant, making it quick and easily test many different GTFS-RT providers, routes and stop configurations (see test_translink.yaml for an example).  The output can optionally be redirected to a text file.
+As it can be time-consuming performing troubleshooting in Home Assistant, a test.py script is provided that is almost identical code but can be run in any python3 environment.  It uses an input yaml file that is in the same format as the configuration file used in Home Assistant, making it quick and easy to test many different GTFS-RT providers, routes and stop configurations (see test_translink.yaml for an example).  The output can optionally be redirected to a text file.
 
 Usage:
 ```
@@ -112,7 +108,7 @@ logger:
   logs:
     custom_components.gtfs_rt: debug
 ```
-2. Restart HA
+2. Restart Home Assistant
 3. Verify you're still having the issue
 4. File an issue in this Github Repository containing your HA log (Developer section > Info > Load Full Home Assistant Log)
    * You can paste your log file at pastebin https://pastebin.com/ and submit a link.
