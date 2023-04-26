@@ -48,7 +48,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_X_API_KEY): cv.string,
         vol.Optional(CONF_VEHICLE_POSITION_URL): cv.string,
         vol.Optional(CONF_ROUTE_DELIMITER): cv.string,
-        vol.Optional(CONF_RELATIVE_TIME): cv.bool
+        vol.Optional(CONF_RELATIVE_TIME): cv.bool,
         vol.Optional(CONF_DEPARTURES): [
             {
                 vol.Required(CONF_NAME): cv.string,
