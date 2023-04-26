@@ -171,7 +171,8 @@ class PublicTransportSensor(Entity):
     def state(self):
         """Return the state of the sensor."""
         next_services = self._get_next_services()
-        if CONF_RELATIVE_TIME:
+        _LOGGER.debug(CONF_RELATIVE_TIME)
+        if CONF_RELATIVE_TIME :
             return (
                 due_in_minutes(next_services[0].arrival_time)
                 if len(next_services) > 0
