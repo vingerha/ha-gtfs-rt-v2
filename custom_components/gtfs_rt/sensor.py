@@ -32,7 +32,7 @@ CONF_VEHICLE_POSITION_URL = "vehicle_position_url"
 CONF_ROUTE_DELIMITER = "route_delimiter"
 CONF_ICON = "icon"
 CONF_SERVICE_TYPE = "service_type"
-CONF_RELATIVE_TIME = "true"
+CONF_RELATIVE_TIME = "show_relative_time"
 
 DEFAULT_SERVICE = "Service"
 DEFAULT_ICON = "mdi:bus"
