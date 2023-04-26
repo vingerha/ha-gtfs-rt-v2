@@ -183,7 +183,7 @@ class PublicTransportSensor(Entity):
             )
         else:
             return (
-                next_services[0].arrival_time.isoformat()
+                next_services[0].arrival_time.replace(tzinfo=None)
                 if len(next_services) > 0
                 else "-"
             )
