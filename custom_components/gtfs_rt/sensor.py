@@ -99,7 +99,9 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     if hass.config.time_zone is None:
         _LOGGER.error("Timezone is not set in Home Assistant configuration")
-    timezone = hass.config.time_zone
+        timezone = "UTC"
+    else:
+        timezone = dt_util.get_time_zone(hass.config.time_zone)  
     _LOGGER.error("TZ")
     _LOGGER.error(timezone)
 
