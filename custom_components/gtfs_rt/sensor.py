@@ -70,6 +70,11 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
+if hass.config.time_zone is None:
+        _LOGGER.error("Timezone is not set in Home Assistant.")
+        return False
+timezone = hass.config.time_zone
+_LOGGER.debug(timezone)
 
 def due_in_minutes(timestamp):
     """Get the remaining minutes from now until a given datetime object."""
@@ -174,7 +179,6 @@ class PublicTransportSensor(Entity):
     def state(self):
         """Return the state of the sensor."""
         next_services = self._get_next_services()
-        _LOGGER.debug(self._relative)
         if self._relative :
             return (
                 due_in_minutes(next_services[0].arrival_time)
