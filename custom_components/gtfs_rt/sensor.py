@@ -70,11 +70,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
-if hass.config.time_zone is None:
-    _LOGGER.error("Timezone is not set in Home Assistant.")
-timezone = hass.config.time_zone
-_LOGGER.debug(timezone)
-
 def due_in_minutes(timestamp):
     """Get the remaining minutes from now until a given datetime object."""
     diff = timestamp - dt_util.now().replace(tzinfo=None)
@@ -101,6 +96,12 @@ def log_debug(data: list, indent_level: int) -> None:
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Get the public transport sensor."""
+
+    if hass.config.time_zone is None:
+        _LOGGER.error("Timezone is not set in Home Assistant configuration")
+    timezone = hass.config.time_zone
+    _LOGGER.error("TZ")
+    _LOGGER.error(timezone)
 
     data = PublicTransportData(
         config.get(CONF_TRIP_UPDATE_URL),
