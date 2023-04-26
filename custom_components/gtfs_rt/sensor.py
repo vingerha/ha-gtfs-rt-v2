@@ -178,10 +178,11 @@ class PublicTransportSensor(Entity):
                 else "-"
             )
         else:
-            return next_services[0].arrival_time.replace(tzinfo=dt_util.UTC)
-            if len(next_services) > 0
+            return (
+                next_services[0].arrival_time.replace(tzinfo=dt_util.UTC)
+                if len(next_services) > 0
                 else "-"
-
+            )
     @property
     def extra_state_attributes(self):
         """Return the state attributes."""
