@@ -48,12 +48,13 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_X_API_KEY): cv.string,
         vol.Optional(CONF_VEHICLE_POSITION_URL): cv.string,
         vol.Optional(CONF_ROUTE_DELIMITER): cv.string,
-        vol.Optional(CONF_RELATIVE_TIME, default=True): cv.boolean,
+        
         vol.Optional(CONF_DEPARTURES): [
             {
                 vol.Required(CONF_NAME): cv.string,
                 vol.Required(CONF_STOP_ID): cv.string,
                 vol.Required(CONF_ROUTE): cv.string,
+                vol.Optional(CONF_RELATIVE_TIME, default=True): cv.boolean,
                 vol.Optional(
                     CONF_DIRECTION_ID,
                     default=DEFAULT_DIRECTION,  # type: ignore
@@ -115,6 +116,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
                 departure.get(CONF_ICON),
                 departure.get(CONF_SERVICE_TYPE),
                 departure.get(CONF_NAME),
+                departure.get(CONF_RELATIVE_TIME),
             )
         )
 
@@ -145,7 +147,7 @@ def get_gtfs_feed_entities(url: str, headers, label: str):
 class PublicTransportSensor(Entity):
     """Implementation of a public transport sensor."""
 
-    def __init__(self, data, stop, route, direction, icon, service_type, name):
+    def __init__(self, data, stop, route, direction, icon, service_type, name, relative):
         """Initialize the sensor."""
         self.data = data
         self._name = name
@@ -154,6 +156,7 @@ class PublicTransportSensor(Entity):
         self._direction = direction
         self._icon = icon
         self._service_type = service_type
+        self._relative = relative
         self.update()
 
     @property
@@ -171,8 +174,8 @@ class PublicTransportSensor(Entity):
     def state(self):
         """Return the state of the sensor."""
         next_services = self._get_next_services()
-        _LOGGER.debug(CONF_RELATIVE_TIME)
-        if CONF_RELATIVE_TIME :
+        _LOGGER.debug(self._relative)
+        if self._relative :
             return (
                 due_in_minutes(next_services[0].arrival_time)
                 if len(next_services) > 0
