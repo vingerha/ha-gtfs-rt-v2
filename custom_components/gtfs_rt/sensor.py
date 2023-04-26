@@ -194,7 +194,7 @@ class PublicTransportSensor(Entity):
         next_services = self._get_next_services()
         ATTR_NEXT_UP = "Next " + self._service_type
         attrs = {
-            ATTR_DUE_IN: self.state,
+            ATTR_DUE_IN: due_in_minutes(next_services[0].arrival_time),
             ATTR_STOP_ID: self._stop,
             ATTR_ROUTE: self._route,
             ATTR_DIRECTION_ID: self._direction,
