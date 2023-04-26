@@ -72,7 +72,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 if hass.config.time_zone is None:
     _LOGGER.error("Timezone is not set in Home Assistant.")
-    return False
 timezone = hass.config.time_zone
 _LOGGER.debug(timezone)
 
