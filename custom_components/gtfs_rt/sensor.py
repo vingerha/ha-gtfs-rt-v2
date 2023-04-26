@@ -20,6 +20,8 @@ ATTR_DUE_IN = "Due in"
 ATTR_DUE_AT = "Due at"
 ATTR_NEXT_UP = "Next Service"
 ATTR_ICON = "Icon"
+ATTR_UNIT_OF_MEASUREMENT = "unit_of_measurement"
+ATTR_DEVICE_CLASS = "device_class"
 
 CONF_API_KEY = "api_key"
 CONF_X_API_KEY = "x_api_key"
@@ -96,14 +98,13 @@ def log_debug(data: list, indent_level: int) -> None:
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Get the public transport sensor."""
-
     if hass.config.time_zone is None:
         _LOGGER.error("Timezone is not set in Home Assistant configuration")
-        _timezone = "UTC"
+        timezone = "UTC"
     else:
-        _timezone = dt_util.get_time_zone(hass.config.time_zone)  
+        timezone=dt_util.get_time_zone(hass.config.time_zone)
     _LOGGER.debug("TZ")
-    _LOGGER.debug(_timezone)
+    _LOGGER.debug(timezone)
 
     data = PublicTransportData(
         config.get(CONF_TRIP_UPDATE_URL),
@@ -124,6 +125,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
                 departure.get(CONF_SERVICE_TYPE),
                 departure.get(CONF_NAME),
                 departure.get(CONF_RELATIVE_TIME),
+                timezone,
             )
         )
 
@@ -154,7 +156,7 @@ def get_gtfs_feed_entities(url: str, headers, label: str):
 class PublicTransportSensor(Entity):
     """Implementation of a public transport sensor."""
 
-    def __init__(self, data, stop, route, direction, icon, service_type, name, relative):
+    def __init__(self, data, stop, route, direction, icon, service_type, name, relative, timezone):
         """Initialize the sensor."""
         self.data = data
         self._name = name
@@ -164,6 +166,7 @@ class PublicTransportSensor(Entity):
         self._icon = icon
         self._service_type = service_type
         self._relative = relative
+        self._timezone = timezone
         self.update()
 
     @property
@@ -189,7 +192,7 @@ class PublicTransportSensor(Entity):
             )
         else:
             return (
-                next_services[0].arrival_time.replace(tzinfo=None)
+                next_services[0].arrival_time.replace(tzinfo=self._timezone)
                 if len(next_services) > 0
                 else "-"
             )
@@ -200,7 +203,7 @@ class PublicTransportSensor(Entity):
         next_services = self._get_next_services()
         ATTR_NEXT_UP = "Next " + self._service_type
         attrs = {
-            ATTR_DUE_IN: due_in_minutes(next_services[0].arrival_time),
+            ATTR_DUE_IN: self.state,
             ATTR_STOP_ID: self._stop,
             ATTR_ROUTE: self._route,
             ATTR_DIRECTION_ID: self._direction,
@@ -220,13 +223,22 @@ class PublicTransportSensor(Entity):
                 if len(next_services) > 1
                 else "-"
             )
+        if self._relative :
+            attrs[ATTR_UNIT_OF_MEASUREMENT] = "min"
+        else :
+            attrs[ATTR_DEVICE_CLASS] = (
+                "timestamp" 
+                if len(next_services) > 0
+                else ""
+            )
+        
         return attrs
 
-    @property
-    def unit_of_measurement(self):
-        """Return the unit this state is expressed in."""
-        return "min"
-
+#    @property
+#    def unit_of_measurement(self):
+#        """Return the unit this state is expressed in."""
+#        return "min"
+           
     @property
     def icon(self):
         return self._icon
