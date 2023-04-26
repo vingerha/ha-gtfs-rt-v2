@@ -32,6 +32,7 @@ CONF_VEHICLE_POSITION_URL = "vehicle_position_url"
 CONF_ROUTE_DELIMITER = "route_delimiter"
 CONF_ICON = "icon"
 CONF_SERVICE_TYPE = "service_type"
+CONF_RELATIVE_TIME = "true"
 
 DEFAULT_SERVICE = "Service"
 DEFAULT_ICON = "mdi:bus"
@@ -47,6 +48,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_X_API_KEY): cv.string,
         vol.Optional(CONF_VEHICLE_POSITION_URL): cv.string,
         vol.Optional(CONF_ROUTE_DELIMITER): cv.string,
+        vol.Optional(CONF_RELATIVE_TIME): cv.bool
         vol.Optional(CONF_DEPARTURES): [
             {
                 vol.Required(CONF_NAME): cv.string,
@@ -169,11 +171,16 @@ class PublicTransportSensor(Entity):
     def state(self):
         """Return the state of the sensor."""
         next_services = self._get_next_services()
-        return (
-            due_in_minutes(next_services[0].arrival_time)
+        if CONF_RELATIVE_TIME:
+            return (
+                due_in_minutes(next_services[0].arrival_time)
+                if len(next_services) > 0
+                else "-"
+            )
+        else:
+            return next_services[0].arrival_time.replace(tzinfo=dt_util.UTC)
             if len(next_services) > 0
-            else "-"
-        )
+                else "-"
 
     @property
     def extra_state_attributes(self):
